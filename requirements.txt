@@ -1,0 +1,11 @@
+# 框架
+pytorch
+transformers
+sklearn
+#信息和进度条
+logging
+tqdm
+# 数据处理
+pandas
+numpy
+
