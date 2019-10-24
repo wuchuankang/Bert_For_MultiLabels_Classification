@@ -24,6 +24,7 @@ args = {
     "warmup_steps": 20000
 }
 
+print(args)
 
 class MyBertForSequenceClassification(BertPreTrainedModel):
 
@@ -102,11 +103,13 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 n_gpu = torch.cuda.device_count()
 logger.info("device: {} n_gpu: {}".format(device, n_gpu))
 
+print('loading the model ...')
 tokenizer = BertTokenizer.from_pretrained('bert-base-chinese')
 model = MyBertForSequenceClassification.from_pretrained('bert-base-chinese')
 # 迁移到 gpu 上
 model.to(device)
 
+print('loaded the model')
 
 class InputExample(object):
     """A single training/test example for simple sequence classification."""
@@ -161,11 +164,13 @@ class MultiLabelTextProcessor():
                 InputExample(guid=guid, text=text, labels=labels))
         return examples
 
+
+print('getting the data ...')
 processor = MultiLabelTextProcessor('./my_data')
 train_data = processor.get_data('sentiment_analysis_trainingset.csv')
 eval_data = processor.get_data('sentiment_analysis_validationset.csv')
 test_data = processor.get_data('sentiment_analysis_testset.csv', labels_available=False)
-
+print('already the data')
 
 labels_list = ['location_traffic_convenience',
        'location_distance_from_business_district', 'location_easy_to_find',
@@ -259,9 +264,11 @@ def get_dataloader(data, batch_size, labels_available=True):
     dataloader = DataLoader(dataset, shuffle=True, batch_size=batch_size)
     return dataloader
 
+print('getting the dataloader ...')
 train_dataloader = get_dataloader(train_data, args['batch_size'])
 eval_dataloader = get_dataloader(eval_data, args['batch_size'])
 test_dataloader = get_dataloader(test_data, args['batch_size'], labels_available=False)
+print('got the dataloader')
 
 
 def get_optimizer(model, lr):       
@@ -276,7 +283,7 @@ def get_optimizer(model, lr):
 
     return AdamW(optimizer_grouped_parameters, lr=lr, eps=1e-8)
 
-
+print('get the optimizer')
 optimizer = get_optimizer(model, lr=args['learning_rate'])
 
 num_epochs = args['num_train_epochs']
@@ -284,6 +291,7 @@ trian_total_steps = int(len(train_data) / args['batch_size'] * num_epochs)
 
 
 # warmup_steps 根据实际情况可以更改
+print('get the scheduler')
 warmup_steps = args['warmup_steps'] 
 scheduler = WarmupLinearSchedule(optimizer, warmup_steps=warmup_steps, t_total=trian_total_steps)
 
@@ -374,6 +382,7 @@ def eval():
     logger.info('f1_score after epoc {}'.format(f1_score))
 
 
+print('trainning ...')
 train(args['num_train_epochs'])
 
 
