@@ -250,6 +250,11 @@ def convert_examples_to_features(examples, max_seq_length, tokenizer, labels_ava
 
 
 def get_dataloader(data, batch_size, labels_available=True):
+    logger.info("***** Running training *****")
+    logger.info("  Num examples = %d", len(data))
+    logger.info("  Batch size = %d", args['train_batch_size'])
+    logger.info("  Num steps = %d", int(len(train_data) / args['batch_size'] * args['num_epocs']))
+        
     features = convert_examples_to_features(data, args['max_seq_length'], tokenizer, labels_available)
     
     all_input_ids = torch.tensor([f.input_ids for f in features], dtype=torch.long)
@@ -287,8 +292,7 @@ def get_optimizer(model, lr):
 logger.info('get the optimizer')
 optimizer = get_optimizer(model, lr=args['learning_rate'])
 
-num_epochs = args['num_train_epochs']
-trian_total_steps = int(len(train_data) / args['batch_size'] * num_epochs)
+trian_total_steps = int(len(train_data) / args['batch_size'] * args['num_train_epochs'])
 
 
 # warmup_steps 根据实际情况可以更改
@@ -322,6 +326,12 @@ def train(num_epocs):
 
         logger.info('Train loss after epoc {}'.format(train_loss / train_steps))
         logger.info('Eval after epoc {}'.format(i_+1))
+
+        
+        # 因为要运行很久，所以每个epoch 保存一次模型
+        if os.path.exists('./directory/to/save/'):
+            os.makedirs('./directory/to/save/')
+        model.save_pretrained('./directory/to/save/')  
         
         eval()
 
