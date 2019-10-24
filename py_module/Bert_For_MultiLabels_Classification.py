@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 import torch
-from troch import nn
+from torch import nn
 from torch.utils.data import TensorDataset, DataLoader
 from transformers import BertTokenizer, BertModel, BertPreTrainedModel 
 from transformers.optimization import AdamW, WarmupLinearSchedule
@@ -24,7 +24,7 @@ args = {
     "warmup_steps": 20000
 }
 
-print(args)
+logger.info('args:{}'.format(args))
 
 class MyBertForSequenceClassification(BertPreTrainedModel):
 
@@ -81,7 +81,8 @@ class MyBertForSequenceClassification(BertPreTrainedModel):
 
         if labels is not None:
             loss_fct = nn.CrossEntropyLoss()
-            loss = torch.tensor([0.])
+            # 这个要放在gpu 上，很容易遗忘，从而 loss.backward()的时候出错
+            loss = torch.tensor([0.]).to(device)
             for i in range(self.num_tasks):
                 loss += loss_fct(logits[i], labels[:,i])
             return loss 
@@ -103,13 +104,13 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 n_gpu = torch.cuda.device_count()
 logger.info("device: {} n_gpu: {}".format(device, n_gpu))
 
-print('loading the model ...')
+logger.info('loading the model ...')
 tokenizer = BertTokenizer.from_pretrained('bert-base-chinese')
 model = MyBertForSequenceClassification.from_pretrained('bert-base-chinese')
 # 迁移到 gpu 上
 model.to(device)
 
-print('loaded the model')
+logger.info('loaded the model')
 
 class InputExample(object):
     """A single training/test example for simple sequence classification."""
@@ -165,12 +166,12 @@ class MultiLabelTextProcessor():
         return examples
 
 
-print('getting the data ...')
+logger.info('getting the data ...')
 processor = MultiLabelTextProcessor('./my_data')
 train_data = processor.get_data('sentiment_analysis_trainingset.csv')
 eval_data = processor.get_data('sentiment_analysis_validationset.csv')
 test_data = processor.get_data('sentiment_analysis_testset.csv', labels_available=False)
-print('already the data')
+logger.info('already the data')
 
 labels_list = ['location_traffic_convenience',
        'location_distance_from_business_district', 'location_easy_to_find',
@@ -264,11 +265,11 @@ def get_dataloader(data, batch_size, labels_available=True):
     dataloader = DataLoader(dataset, shuffle=True, batch_size=batch_size)
     return dataloader
 
-print('getting the dataloader ...')
+logger.info('getting the dataloader ...')
 train_dataloader = get_dataloader(train_data, args['batch_size'])
 eval_dataloader = get_dataloader(eval_data, args['batch_size'])
 test_dataloader = get_dataloader(test_data, args['batch_size'], labels_available=False)
-print('got the dataloader')
+logger.info('got the dataloader')
 
 
 def get_optimizer(model, lr):       
@@ -283,7 +284,7 @@ def get_optimizer(model, lr):
 
     return AdamW(optimizer_grouped_parameters, lr=lr, eps=1e-8)
 
-print('get the optimizer')
+logger.info('get the optimizer')
 optimizer = get_optimizer(model, lr=args['learning_rate'])
 
 num_epochs = args['num_train_epochs']
@@ -291,7 +292,7 @@ trian_total_steps = int(len(train_data) / args['batch_size'] * num_epochs)
 
 
 # warmup_steps 根据实际情况可以更改
-print('get the scheduler')
+logger.info('get the scheduler')
 warmup_steps = args['warmup_steps'] 
 scheduler = WarmupLinearSchedule(optimizer, warmup_steps=warmup_steps, t_total=trian_total_steps)
 
@@ -382,7 +383,7 @@ def eval():
     logger.info('f1_score after epoc {}'.format(f1_score))
 
 
-print('trainning ...')
+logger.info('trainning ...')
 train(args['num_train_epochs'])
 
 
