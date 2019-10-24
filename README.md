@@ -2,7 +2,7 @@
 
 这是用 bert 实现的 AI Challenger 2018 : 细粒度用户评论情感分析 的一个解决方案。 
     
-- 数据集和预训练模型：https://pan.baidu.com/s/1NaIH8ItjZyrWERpLPM4Gyg 提取码: rr8s 
+- 数据集和预训练模型：https://pan.baidu.com/s/1NaIH8ItjZyrWERpLPM4Gyg 提取码: rr8s  
 transformers 中预训练模型有时候下载预训练好的参数很慢(如果你的下载很快，可不用下载网盘中的模型)，transformers 默认将预训练的参数保存在 ~/.cache/torch/transformers 下的；网盘中 save.zip 解压后，要将程序中加载模型的语句改成为：  
     ```python
     MyBertSequenceForClassification.from_pretrained('./save')
