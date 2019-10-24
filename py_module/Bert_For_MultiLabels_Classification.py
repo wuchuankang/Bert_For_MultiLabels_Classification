@@ -57,8 +57,7 @@ class MyBertForSequenceClassification(BertPreTrainedModel):
 
         self.init_weights()
 
-    def forward(self, input_ids, attention_mask=None, token_type_ids=None,
-                position_ids=None, head_mask=None, labels=None):
+    def forward(self, input_ids, token_type_ids=None, attention_mask=None, labels=None):
         """forward
 
         :param input_ids:
@@ -67,9 +66,7 @@ class MyBertForSequenceClassification(BertPreTrainedModel):
 
         outputs = self.bert(input_ids,
                             attention_mask=attention_mask,
-                            token_type_ids=token_type_ids,
-                            position_ids=position_ids, 
-                            head_mask=head_mask)
+                            token_type_ids=token_type_ids)
 
         pooled_output = outputs[1]
 
@@ -357,7 +354,7 @@ def eval():
         
         # 可以在这里添加一个 assert 判断！
         
-        eval_loss += tmp_eval_loss.mean().item()
+        eval_loss += tmp_eval_loss.item()
 
         num_eval += input_ids.size(0)
         eval_steps += 1
