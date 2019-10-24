@@ -18,10 +18,10 @@ logger = logging.getLogger(__name__)
 
 args = {
     "max_seq_length": 512,
-    "batch_size": 32,
+    "batch_size": 8,
     "learning_rate": 3e-5,
     "num_train_epochs": 4,
-    "warmup_steps": 20000
+    "warmup_steps": 2000
 }
 
 logger.info('args:{}'.format(args))
@@ -252,8 +252,8 @@ def convert_examples_to_features(examples, max_seq_length, tokenizer, labels_ava
 def get_dataloader(data, batch_size, labels_available=True):
     logger.info("***** Running training *****")
     logger.info("  Num examples = %d", len(data))
-    logger.info("  Batch size = %d", args['train_batch_size'])
-    logger.info("  Num steps = %d", int(len(train_data) / args['batch_size'] * args['num_epocs']))
+    logger.info("  Batch size = %d", args['batch_size'])
+    logger.info("  Num steps = %d", int(len(train_data) / args['batch_size'] * args['num_train_epochs']))
         
     features = convert_examples_to_features(data, args['max_seq_length'], tokenizer, labels_available)
     
@@ -301,10 +301,10 @@ warmup_steps = args['warmup_steps']
 scheduler = WarmupLinearSchedule(optimizer, warmup_steps=warmup_steps, t_total=trian_total_steps)
 
 
-def train(num_epocs):
+def train(num_epochs):
 
     model.train()
-    for i_ in tqdm(range(int(num_epocs)), desc="Epoch"):
+    for i_ in tqdm(range(int(num_epochs)), desc="Epoch"):
 
         train_loss = 0
         num_train, train_steps = 0, 0
