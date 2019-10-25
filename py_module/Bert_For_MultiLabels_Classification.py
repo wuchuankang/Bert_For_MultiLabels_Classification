@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import pandas as pd
 import numpy as np
@@ -27,13 +28,6 @@ args = {
 logger.info('args:{}'.format(args))
 
 class MyBertForSequenceClassification(BertPreTrainedModel):
-
-    """
-    # 有6大类，下面共有20个标签，不考虑大类，直接考虑标签，每个标签有4个类别，可以将
-    # 任务分为多任务分类问题，每一个任务都是一个4分类问题。
-    # 参见 https://github.com/brightmart/sentiment_analysis_fine_grain
-    """
-
 
     num_labels = 4
     num_tasks = 20
@@ -88,6 +82,7 @@ class MyBertForSequenceClassification(BertPreTrainedModel):
             return loss 
         else:
             # 用于 验证集和测试集 标签的预测, 维度是[num_tasks, batch, num_labels]
+            logits = [logit.numpy() for logit in logits]
             return torch.tensor(logits)
 
     # 可以选择 冻结 BertModel 中的参数，也可以不冻结，在 multiLabels classification 中不冻结,不调用该函数即可。这里给出了一个冻结的示范
@@ -101,12 +96,15 @@ class MyBertForSequenceClassification(BertPreTrainedModel):
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#device = torch.device("cpu")
 n_gpu = torch.cuda.device_count()
 logger.info("device: {} n_gpu: {}".format(device, n_gpu))
 
 logger.info('loading the model ...')
 tokenizer = BertTokenizer.from_pretrained('bert-base-chinese')
 model = MyBertForSequenceClassification.from_pretrained('bert-base-chinese')
+# 如果是调用保存的 参数模型，将模型参数路径放在和该模块同一路径，加入该模型的文件名为'save'，那么改为：
+#model = MyBertForSequenceClassification.from_pretrained('./save')
 # 迁移到 gpu 上
 model.to(device)
 
@@ -253,7 +251,7 @@ def get_dataloader(data, batch_size, labels_available=True):
     logger.info("***** Running training *****")
     logger.info("  Num examples = %d", len(data))
     logger.info("  Batch size = %d", args['batch_size'])
-    logger.info("  Num steps = %d", int(len(train_data) / args['batch_size'] * args['num_train_epochs']))
+    logger.info("  Num steps = %d", int(len(data) / args['batch_size'] * args['num_train_epochs']))
         
     features = convert_examples_to_features(data, args['max_seq_length'], tokenizer, labels_available)
     
@@ -317,6 +315,7 @@ def train(num_epochs):
             loss.backward()
 
             train_loss += loss.item()
+            print('train_loss:', loss.item() / args['batch_size'])
             num_train += input_ids.size(0)
             train_steps += 1
             
@@ -324,12 +323,12 @@ def train(num_epochs):
             scheduler.step()
             optimizer.zero_grad()
 
-        logger.info('Train loss after epoc {}'.format(train_loss / train_steps))
+        logger.info('Train loss after epoc {}'.format(train_loss / train_steps / args['batch_size']))
         logger.info('Eval after epoc {}'.format(i_+1))
 
         
         # 因为要运行很久，所以每个epoch 保存一次模型
-        if os.path.exists('./directory/to/save/'):
+        if not os.path.exists('./directory/to/save/'):
             os.makedirs('./directory/to/save/')
         model.save_pretrained('./directory/to/save/')  
         
@@ -389,7 +388,7 @@ def eval():
         
     f1_score  = np.mean(f1_scores_list)
     
-    logger.info('Eval loss after epoc {}'.format(eval_loss))
+    logger.info('Eval loss after epoc {}'.format(eval_loss / args['batch_size']))
     logger.info('f1_score after epoc {}'.format(f1_score))
 
 
