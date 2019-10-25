@@ -328,9 +328,10 @@ def train(num_epochs):
 
         
         # 因为要运行很久，所以每个epoch 保存一次模型
-        if not os.path.exists('./directory/to/save/'):
-            os.makedirs('./directory/to/save/')
-        model.save_pretrained('./directory/to/save/')  
+        path = './directory/to/save/'
+        if not os.path.exists(path):
+            os.makedirs(path)
+        model.save_pretrained(path)  
         
         eval()
 
@@ -435,4 +436,4 @@ def predict():
     return pd.merge(pd.DataFrame(input_data), pd.DataFrame(pred_labels.T.numpy(), columns=labels_list), left_index=True, right_index=True)
 
 results = predict()
-pd.to_csv(results, index=False)
+results.to_csv('results.csv', index=False)
