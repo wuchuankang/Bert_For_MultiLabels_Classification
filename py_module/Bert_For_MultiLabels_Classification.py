@@ -315,13 +315,15 @@ def train(num_epochs):
             loss.backward()
 
             train_loss += loss.item()
-            print('train_loss:', loss.item() / args['batch_size'])
             num_train += input_ids.size(0)
             train_steps += 1
             
             optimizer.step()
             scheduler.step()
             optimizer.zero_grad()
+
+            if step % 100 == 0:
+                print('train_loss:', loss.item() / args['batch_size'])
 
         logger.info('Train loss after epoc {}'.format(train_loss / train_steps / args['batch_size']))
         logger.info('Eval after epoc {}'.format(i_+1))
