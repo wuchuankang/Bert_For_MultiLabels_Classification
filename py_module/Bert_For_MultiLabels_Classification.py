@@ -397,7 +397,8 @@ train(args['num_train_epochs'])
 
 
 # Save a trained model
-model.save_pretrained('./directory/to/save/')  
+#已经在循环中保存了，不需要在保存一次了
+#model.save_pretrained('./directory/to/save/')  
 
 # re-load
 #model = MyBertForSequenceClassification.from_pretrained('./directory/to/save/') 
@@ -426,12 +427,12 @@ def predict():
         else:
             all_logits = torch.cat((all_logits, logits.detach().cpu()), 1)
         
-    # pred_labels : [num_tasks, num_eval]
-    pred_labels = torch.argmax(all_logits, dim=2) 
+    # pred_labels : [num_tasks, num_test]
+    pred_labels = torch.argmax(all_logits, dim=2)
     
     # 因为预处理将标签 +2，所以这里再减去2
     pred_labels -= 2
-    return pd.merge(pd.DataFrame(input_data), pd.DataFrame(pred_labels.numpy(), columns=labels_list), left_index=True, right_index=True)
+    return pd.merge(pd.DataFrame(input_data), pd.DataFrame(pred_labels.T.numpy(), columns=labels_list), left_index=True, right_index=True)
 
 results = predict()
 pd.to_csv(results, index=False)
