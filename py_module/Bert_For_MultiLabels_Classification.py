@@ -82,7 +82,7 @@ class MyBertForSequenceClassification(BertPreTrainedModel):
             return loss 
         else:
             # 用于 验证集和测试集 标签的预测, 维度是[num_tasks, batch, num_labels]
-            logits = [logit.numpy() for logit in logits]
+            logits = [logit.cpu().numpy() for logit in logits]
             return torch.tensor(logits)
 
     # 可以选择 冻结 BertModel 中的参数，也可以不冻结，在 multiLabels classification 中不冻结,不调用该函数即可。这里给出了一个冻结的示范
@@ -363,12 +363,12 @@ def eval():
         if all_logits is None:
             all_logits = logits.detach().cpu()
         else:
-            all_logits = torch.cat((all_logits, logits.detach().cpu()), axis=1)
+            all_logits = torch.cat((all_logits, logits.detach().cpu()), 1)
             
         if all_labels is None:
             all_labels = label_ids.detach().cpu()
         else:    
-            all_labels = torch.cat((all_labels, label_ids.detach().cpu()), axis=0)
+            all_labels = torch.cat((all_labels, label_ids.detach().cpu()), 0)
         
         # 可以在这里添加一个 assert 判断！
         
@@ -386,10 +386,10 @@ def eval():
     for i in range(num_tasks):
         f1_scores_list.append(f1_score(all_labels[:,i].numpy(), pred_labels[i].numpy(), average='macro'))
         
-    f1_score  = np.mean(f1_scores_list)
+    f1_scores  = np.mean(f1_scores_list)
     
     logger.info('Eval loss after epoc {}'.format(eval_loss / args['batch_size']))
-    logger.info('f1_score after epoc {}'.format(f1_score))
+    logger.info('f1_score after epoc {}'.format(f1_scores))
 
 
 logger.info('trainning ...')
@@ -424,7 +424,7 @@ def predict():
         if all_logits is None:
             all_logits = logits.detach().cpu()
         else:
-            all_logits = torch.cat((all_logits, logits.detach().cpu()), axis=1)
+            all_logits = torch.cat((all_logits, logits.detach().cpu()), 1)
         
     # pred_labels : [num_tasks, num_eval]
     pred_labels = torch.argmax(all_logits, dim=2) 
