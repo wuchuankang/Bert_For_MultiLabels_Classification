@@ -12,7 +12,8 @@ transformers 中预训练模型有时候下载预训练好的参数很慢(如果
 
 - 具体实现步骤： 
     - 将网盘中的数据 comments_classification.zip 下载到notebook 文件夹下解压，得到 comments_classification 文件夹；
-    - 先运行processing_data.ipynb ，然后运行 Bert_For_MultiLabels_Classification.ipynb 
+    - 先运行processing_data.ipynb ，然后运行 Bert_For_MultiLabels_Classification.ipynb ；
+    - 如果使用 py 文件运行，参见 py_module ；
 
 
 - 实现具体参照了：
