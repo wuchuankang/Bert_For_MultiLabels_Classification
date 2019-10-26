@@ -1,1 +1,4 @@
 .git/
+py_module/bert_model/__pycache__/
+directory.zip
+directory/

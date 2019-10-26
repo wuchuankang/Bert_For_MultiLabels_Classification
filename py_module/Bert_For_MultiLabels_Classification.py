@@ -322,7 +322,7 @@ def train(num_epochs):
             scheduler.step()
             optimizer.zero_grad()
 
-            if step % 100 == 0:
+            if step % 300 == 0:
                 print('train_loss:', loss.item() / args['batch_size'])
 
         logger.info('Train loss after epoc {}'.format(train_loss / train_steps / args['batch_size']))
