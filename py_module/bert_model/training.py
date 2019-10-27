@@ -31,6 +31,7 @@ def train(num_epochs, train_dataloader, eval_dataloader, model, optimizer, sched
 
             if step % 300 == 0:
                 print('train_loss:', loss.item() / args['batch_size'])
+                print('already computed :{}%', (step / args['total_steps'])*100)
 
         print('Train loss after epoc {}'.format(train_loss / train_steps / args['batch_size']))
         print('Eval after epoc {}'.format(i_+1))

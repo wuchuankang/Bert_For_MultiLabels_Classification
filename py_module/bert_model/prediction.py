@@ -31,5 +31,5 @@ def predict(model, test_data, test_dataloader, labels_list):
     
     # 因为预处理将标签 +2，所以这里再减去2
     pred_labels -= 2
-    return pd.merge(pd.DataFrame(input_data), pd.DataFrame(pred_labels.T.numpy(), columns=labels_list), left_index=True, right_index=True)
+    return pd.merge(pd.DataFrame(input_data), pd.DataFrame(pred_labels.transpose(0,1).numpy(), columns=labels_list), left_index=True, right_index=True)
 
