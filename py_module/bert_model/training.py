@@ -65,7 +65,6 @@ def eval(model, eval_dataloader):
             logits = model(input_ids, segment_ids, input_mask)
 
             
-            
         # 将各个batch 的 logits 和 labels 拼接在一起，用于 f1_score 计算
         # logits 维度 [num_tasks, batch, 4], label_ids ： [ batch, num_tasks]
         # all_logits :[num_tasks, num_eval, 4], all_label_ids : [num_eval, num_tasks]
@@ -79,8 +78,6 @@ def eval(model, eval_dataloader):
             all_labels = label_ids.detach().cpu()
         else:    
             all_labels = torch.cat((all_labels, label_ids.detach().cpu()), 0)
-        
-        # 可以在这里添加一个 assert 判断！
         
         eval_loss += tmp_eval_loss.item()
 
