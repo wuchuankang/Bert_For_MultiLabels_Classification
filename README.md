@@ -1,15 +1,17 @@
 ## Bert for multilabels classification
 
 这是用 bert 实现的 AI Challenger 2018 : 细粒度用户评论情感分析 的一个解决方案。 
-    
-- 数据集和预训练模型：https://pan.baidu.com/s/1NaIH8ItjZyrWERpLPM4Gyg 提取码: rr8s  
+
+- 数据集、预训练模型和训练好的模型在：https://pan.baidu.com/s/1b31yrcfY3ZQrlxknYP7fHg 提取码: m8vx
 transformers 中预训练模型有时候下载预训练好的参数很慢(如果你的下载很快，可不用下载网盘中 save.zip 模型)，transformers 默认将预训练的参数保存在 ~/.cache/torch/transformers 下的；  
 如果要使用网盘中的模型，网盘中 save.zip 放在与 comments_classification 同一目录后解压，同时要将程序中加载模型的语句改成为：  
     ```python
-    MyBertSequenceForClassification.from_pretrained('./save')
+    model = MyBertSequenceForClassification.from_pretrained('./save')
     ```
-    网盘中的 comment-classification.zip 是原始数据集。
-
+    网盘中的 comment-classification.zip 是原始数据集，directory.zip 是训练好的模型参数，总共训练了4 个epoch，在 TslaK80 显卡上，每个 epoch 训练时长为6.5h，在测试集上宏平均 f1_score = 0.68，同样，如果想加载训练好的模型继续训练，模型生成改成：
+    ```python
+    model = MyBertSequenceForClassification.from_pretrained('./directory/to/save')
+    ```
 - 具体实现步骤： 
     - 将网盘中的数据 comments_classification.zip 下载到notebook 文件夹下解压，得到 comments_classification 文件夹；
     - 先运行processing_data.ipynb ，然后运行 Bert_For_MultiLabels_Classification.ipynb ；
